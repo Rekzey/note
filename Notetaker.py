@@ -4,6 +4,7 @@ import conf as c
 
 from copy import deepcopy
 from glob import iglob
+from math import floor
 import time
 import os
 
@@ -60,19 +61,30 @@ class notetaker:
             self.latest_changes.append({deepcopy(self.context) : w})
             return 0
 
-    def read_context(self):
+    def read_context(self, args):
+        pages = []
+        try:
+            page = int(args[0])-1
+            if page < 0:
+                raise Exception('Die')
+        except:
+            page = 0
         if self.context is None:
             return '{}There is currenly no open file, use the `open` command'.format(e.CANNOT)
         with open(self.context, 'r') as f:
-            data = f.read()
-        if len(data) >= 2000:
-            return '{}File too big to show'.format(e.ERROR)
-        return '```{}```'.format(data)
+            chunk = f.read(1900)
+            while chunk != '':
+                pages.append(chunk)
+                chunk = f.read(1900)
+        if page > len(pages)-1:
+            return '{}Invalid page.'.format(e.ERROR)
+        return '```{}```'.format(pages[page])
 
     def delete(self, filename):
         if not filename in self.files:
             return '{}Nonexistent file'.format(e.ERROR)
         os.remove(self.root + filename)
+        self.files.pop(self.files.index(filename))
         return e.GOOD[:-3]
 
     def undo(self):

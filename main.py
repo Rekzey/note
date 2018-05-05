@@ -36,7 +36,7 @@ async def on_message(msg):
         elif cmd.startswith('close'):
             await client.send_message(chan, NOTES.close_context())
         elif cmd.startswith('read'):
-            await client.send_message(chan, NOTES.read_context())
+            await client.send_message(chan, NOTES.read_context(cmd.split()[1:]))
         elif cmd.startswith('delete'):
             args = cmd.split()[1:]
             if 0 < len(args) < 2:
@@ -55,6 +55,8 @@ async def on_message(msg):
         elif cmd.startswith('undo'):
             await client.send_message(chan, NOTES.undo())
     elif chan.is_private and user in UDB:
+        if cmd == '\\n':
+            cmd = '\n'
         out = UDB[user].write_to_context(co.TXT, data=cmd)
         if out == 0:
             await client.add_reaction(msg, '✅')
